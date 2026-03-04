@@ -1,103 +1,201 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>System Error</title>
+<title>Babah</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
 
 <style>
-body{
-    margin:0;
-    height:100vh;
-    background:black;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    font-family:Arial, sans-serif;
-    color:white;
-    overflow:hidden;
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Creepster', cursive;
+    background: black;
 }
 
-button{
-    padding:20px 40px;
-    font-size:20px;
-    background:red;
-    color:white;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
+.screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
-#countdown{
-    font-size:90px;
-    margin-top:30px;
+.blood-btn {
+    padding: 20px 60px;
+    font-size: 40px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    background: black;
+    position: relative;
+    box-shadow: 0 0 25px red;
 }
 
-#corruptedScreen{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    display:none;
-    z-index:999;
+.blood-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 30% 30%, darkred 10%, transparent 40%),
+        radial-gradient(circle at 70% 60%, red 10%, transparent 40%),
+        radial-gradient(circle at 50% 80%, darkred 10%, transparent 40%);
+    opacity: 0.7;
 }
 
-#corruptedScreen img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
+.title {
+    color: red;
+    font-size: 45px;
+    text-shadow: 0 0 25px darkred;
+    margin-bottom: 40px;
+}
+
+.text {
+    color: red;
+    font-size: 40px;
+    text-align: center;
+}
+
+.hidden { display: none; }
+
+img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#loading {
+    background: black;
+    color: red;
+    font-size: 35px;
+    animation: flicker 1s infinite;
+}
+
+@keyframes flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
 }
 </style>
 </head>
+
 <body>
 
-<button onclick="explodir()">Explodir celular</button>
-<div id="countdown"></div>
+<!-- LOADING -->
+<div class="screen" id="loading">
+    <div>loading mind...</div>
+</div>
 
-<div id="corruptedScreen">
+<!-- BOTÃO INICIAL -->
+<div class="screen hidden" id="startScreen">
+    <button class="blood-btn" onclick="startApp()">???</button>
+</div>
+
+<!-- TELA PRINCIPAL -->
+<div class="screen hidden" id="mainScreen"
+     style="background: url('background.png') center/cover no-repeat;">
+    <div class="title">babah is angry!</div>
+    <button class="blood-btn" onclick="startStory()">RUN!</button>
+</div>
+
+<!-- HISTÓRIA -->
+<div class="screen hidden" id="storyScreen" style="background:black;">
+    <div class="text" id="storyText"></div>
+    <button class="blood-btn hidden" id="againBtn" onclick="runAgain()">Run Again?</button>
+</div>
+
+<!-- JUMPSCARE -->
+<div class="screen hidden" id="imageScreen">
+    <img src="final.png">
+</div>
+
+<!-- CORROMPIDO -->
+<div class="screen hidden" id="corruptedScreen">
     <img src="corrompido.png">
 </div>
 
+<!-- ÁUDIOS -->
+<audio id="bgMusic" src="musica.mp3" preload="auto" loop></audio>
+<audio id="jumpscareSound" src="jumpscare.mp3" preload="auto"></audio>
+
 <script>
+let bgMusic = document.getElementById("bgMusic");
+let jumpSound = document.getElementById("jumpscareSound");
 
-function explodir(){
-
-    let btn = document.querySelector("button");
-    btn.style.display = "none";
-
-    let countdown = document.getElementById("countdown");
-    let tela = document.getElementById("corruptedScreen");
-
-    let tempo = 3;
-    countdown.innerText = tempo;
-
-    // Vibração contínua enquanto conta
-    if(navigator.vibrate){
-        navigator.vibrate(100000); // vibra por 100 segundos (ou até parar)
-    }
-
-    let interval = setInterval(() => {
-        tempo--;
-        countdown.innerText = tempo;
-
-        if(tempo <= 0){
-            clearInterval(interval);
-            countdown.innerText = "";
-
-            // PARAR vibração imediatamente
-            if(navigator.vibrate){
-                navigator.vibrate(0);
-            }
-
-            // Mostrar imagem
-            tela.style.display = "block";
-        }
-
-    },1000);
+window.onload = function() {
+    setTimeout(() => {
+        document.getElementById("loading").classList.add("hidden");
+        document.getElementById("startScreen").classList.remove("hidden");
+    }, 4000);
 }
 
+function startApp() {
+    bgMusic.play().catch(()=>{});
+    document.getElementById("startScreen").classList.add("hidden");
+    document.getElementById("mainScreen").classList.remove("hidden");
+}
+
+function startStory() {
+    document.getElementById("mainScreen").classList.add("hidden");
+    document.getElementById("storyScreen").classList.remove("hidden");
+
+    if (navigator.vibrate) navigator.vibrate(5000);
+
+    setTimeout(() => {
+        document.getElementById("storyText").innerText = "you are running";
+    }, 1000);
+
+    setTimeout(() => {
+        document.getElementById("storyText").innerText = "but babah gotcha you";
+    }, 8000);
+
+    setTimeout(() => {
+        document.getElementById("againBtn").classList.remove("hidden");
+    }, 13000);
+}
+
+function runAgain() {
+
+    // Para música de fundo
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+
+    document.getElementById("storyScreen").classList.add("hidden");
+
+    setTimeout(() => {
+
+        document.getElementById("imageScreen").classList.remove("hidden");
+
+        // FORÇA O JUMPSCARE A TOCAR
+        jumpSound.currentTime = 0;
+        jumpSound.muted = false;
+        jumpSound.volume = 1.0;
+
+        let promise = jumpSound.play();
+        if (promise !== undefined) {
+            promise.catch(() => {
+                console.log("Autoplay bloqueado");
+            });
+        }
+
+    }, 6000);
+
+    setTimeout(() => {
+        document.getElementById("imageScreen").classList.add("hidden");
+        jumpSound.pause();
+        jumpSound.currentTime = 0;
+    }, 16000);
+
+    setTimeout(() => {
+        document.getElementById("corruptedScreen").classList.remove("hidden");
+    }, 19000);
+}
 </script>
 
 </body>
